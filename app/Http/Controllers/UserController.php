@@ -12,11 +12,17 @@ class UserController extends Controller
 {
     public function getAllUsers(Request $request)
     {
-        if (!$request->user()->role == RoleEnum::ADMIN) {
-             return response()->json([
-                 'error' => 'the role must be admin'
-             ], 403);
-         }
+        // if (!$request->user()->role == RoleEnum::ADMIN) {
+        //      return response()->json([
+        //          'error' => 'the role must be admin'
+        //      ], 403);
+        //  }
+        // if (!$request->user() || $request->user()->role !== RoleEnum::ADMIN) {
+        //     return response()->json([
+        //         'error' => 'The role must be admin'
+        //     ], 403);
+        // }
+
         try {
             $users = User::all();
             return response()->json([

@@ -60,10 +60,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('orders', [OrdersController::class, 'index']);
 
     // 4) Modify/Update Order
-    Route::put('orders', [OrdersController::class, 'update']);
+    Route::put('orders/{order}', [OrdersController::class, 'update']);
 
     // 5) Logout User
     Route::put('logout', [AuthenticatedSessionController::class, 'logout']);
 
     Route::delete('users/{id}', [UserController::class, 'destroy']);
+
+
+
 });
