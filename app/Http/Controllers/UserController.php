@@ -12,16 +12,7 @@ class UserController extends Controller
 {
     public function getAllUsers(Request $request)
     {
-        // if (!$request->user()->role == RoleEnum::ADMIN) {
-        //      return response()->json([
-        //          'error' => 'the role must be admin'
-        //      ], 403);
-        //  }
-        // if (!$request->user() || $request->user()->role !== RoleEnum::ADMIN) {
-        //     return response()->json([
-        //         'error' => 'The role must be admin'
-        //     ], 403);
-        // }
+
 
         try {
             $users = User::all();
@@ -51,5 +42,28 @@ class UserController extends Controller
             return response()->json(['error' => 'Failed to delete user'], 500);
         }
     }
+
+    public function addUser(Request $request)
+    {
+        try {
+            $data = $request->validate([
+                'name' => 'required|string',
+                'email' => 'required|email|unique:users,email',
+                'password' => 'required|string',
+
+            ]);
+
+            $user = User::create([
+                'name' => $data['name'],
+                'email' => $data['email'],
+                'password' => bcrypt($data['password']),
+            ]);
+
+            return response()->json(['message' => 'User created successfully', 'user' => $user], 201);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Failed to create user', 'message' => $e->getMessage()], 500);
+        }
+    }
+
 
 }

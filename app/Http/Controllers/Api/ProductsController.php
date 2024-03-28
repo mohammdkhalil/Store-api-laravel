@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Category;
+use App\Models\Order;
 use App\Models\Product;
+use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -60,7 +62,7 @@ class ProductsController extends Controller
             'message' => 'product has been added successfully',
         ], 200);
     }
-    public function update(Request $request, Product $product): JsonResponse
+    public function update(Request $request, $product): JsonResponse
     {
         if (empty($request)) {
             return response()->json(
@@ -77,7 +79,7 @@ class ProductsController extends Controller
             'price' => 'required',
             'category' => 'required',
         ]);
-        $newProduct = Product::where('id', $product->id)->update(
+        $newProduct = Product::where('id', $product)->update(
             [
                 'name' => $request['name'],
                 'description' => $request['description'],
@@ -90,9 +92,23 @@ class ProductsController extends Controller
             'message' => 'product has been updated successfully',
         ], 200);
     }
-    public function GetProducts(): JsonResponse
+    public function GetProducts(Request $request): JsonResponse
     {
-        $proudcts = Product::all();
+        // init request parameters
+        $name = $request->name;
+        $category = $request->category;
+
+        $proudcts = Product::get();
+
+        // filter by name
+        if (!empty($name)) {
+            $proudcts = $proudcts->where('name', $name);
+        }
+
+        // filter by category
+        if (!empty($category)) {
+            $proudcts = $proudcts->where('category', $category);
+        }
 
         return response()->json([
             'message' => 'products has been retreived successfully',
@@ -142,11 +158,11 @@ class ProductsController extends Controller
             return response()->json(['message' => 'Something went wrong!'], 500);
         }
     }
-    public function destroyCategory($categoryId)
+    public function destroyCategory($id)
     {
         try {
             // Check if the category exists
-            $category = Category::find($categoryId);
+            $category = Category::find($id);
             if (!$category) {
                 return response()->json(['message' => 'Category not found'], 404);
             }
@@ -168,4 +184,47 @@ class ProductsController extends Controller
             return response()->json(['message' => 'Failed to delete category', 'error' => $e->getMessage()], 500);
         }
     }
+
+    public function updateCategory(Request $request, $id)
+    {
+        $validator = Validator::make($request->all(), [
+            'name' => ['required', 'string'],
+            'desc' => ['nullable', 'string']
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 401);
+        }
+        try {
+            $category = Category::find($id);
+            if (!$category) {
+                return response()->json(['message' => 'Category not found'], 404);
+            }
+
+            $category->name = $request->input('name');
+            $category->desc = $request->input('desc');
+            $category->save();
+
+            return response()->json([
+                "message" => "Category updated successfully",
+                "data" => $category
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Failed to update category', 'error' => $e->getMessage()], 500);
+        }
+    }
+
+
+    public function statistics()
+    {
+        try {
+            $data['category'] = Category::count();
+            $data['product'] = Product::count();
+            $data['user'] = User::count();
+            $data ['order'] = Order::count();
+            return response()->json(['data' => $data], 200);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Failed'], 500);
+        }
+    }
+
 }

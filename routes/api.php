@@ -34,15 +34,21 @@ Route::middleware('guest')->group(function () {
 
     // 3) Get Products
     Route::get('products', [ProductsController::class, 'GetProducts']);
-
+    Route::put('products/{id}', [ProductsController::class, 'update']);
     // 4) Get Categories
     Route::get('categories', [ProductsController::class, 'GetCategories']);
 
     Route::post('categories', [ProductsController::class, 'createCategories']);
 
-    Route::delete('categories', [ProductsController::class, 'destroyCategory']);
+    Route::delete('categories/{id}', [ProductsController::class, 'destroyCategory']);
+
+    Route::put('categories/{id}', [ProductsController::class, 'updateCategory']);
+
     //add
     Route::post('addProduct', [ProductsController::class, 'store']);
+
+    Route::post('users', [UserController::class, 'addUser']);
+    Route::get('statistics', [ProductsController::class, 'statistics']);
 });
 
 // auth requests
@@ -66,6 +72,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('logout', [AuthenticatedSessionController::class, 'logout']);
 
     Route::delete('users/{id}', [UserController::class, 'destroy']);
+
+
+
+
+
 
 
 
